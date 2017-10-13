@@ -203,6 +203,20 @@ static void load_instrument(MidSong *song, const char *name,
   if (song->ifp == NULL)
     {
       DEBUG_MSG("Instrument `%s' can't be found.\n", name);
+
+      /* Add this to the log */
+      if (!song->load_request_buffer)
+      	song->load_request_buffer = timi_calloc(128 * sizeof(char *));
+
+      if (song->load_request_count < 128) {
+      	/* Make sure we haven't already added it */
+      	for (i=0; i < song->load_request_count; i++)
+      		if (!strcmp(song->load_request_buffer[i], name))
+      			return;
+
+      	song->load_request_buffer[song->load_request_count++] = strdup(name);
+      }
+
       return;
     }
   fp = song->ifp;
