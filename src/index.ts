@@ -298,14 +298,32 @@ const TAudioContext: typeof AudioContext = (window as any).AudioContext ||
 
 let _loaded = false;
 
-export async function playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: string): Promise<Player> {
-    const prefs = _getDefaultPreferences();
+function iosHack(audioContext: AudioContext) {
+    const resume = function () {
+        audioContext.resume();
 
+        setTimeout(function () {
+            if (audioContext.state === 'running') {
+                document.body.removeEventListener('touchend', resume, false);
+            }
+        }, 0);
+    };
+
+    document.body.addEventListener('touchend', resume, false);
+}
+
+export function playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: string): Promise<Player> {
     // We need to do this in this context in case we're in Safari. Safari requires AudioContexts
     // to be created in response to a user event.
     invariant(TAudioContext != null, "Environment must support AudioContext.");
 
     const audioContext = new TAudioContext();
+    iosHack(audioContext);
+    return _playerFromMIDIBuffer(midiData, patchUrlPrefix, audioContext);
+}
+
+async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: string, audioContext: AudioContext): Promise<Player> {
+    const prefs = _getDefaultPreferences();
 
     var node = audioContext.createScriptProcessor(prefs.bufferSize, 0, prefs.channels);
     node.connect(audioContext.destination);

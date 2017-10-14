@@ -1,10 +1,10 @@
 {
   "name": "hackmidi",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "It plays MIDI files in the browser without mining bitcoins in the background.",
   "main": "lib/index.js",
   "author": "Joshua Netterfield <joshua@nettek.ca>",
-  "license": "MIT",
+  "license": "LGPLv3",
   "private": false,
   "devDependencies": {
     "typescript": "2.5.3"
