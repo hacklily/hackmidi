@@ -1,9 +1,15 @@
 {
-  "name": "midi-potato",
+  "name": "hackmidi",
   "version": "0.0.1",
   "description": "It plays MIDI files in the browser without mining bitcoins in the background.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "author": "Joshua Netterfield <joshua@nettek.ca>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "devDependencies": {
+    "typescript": "2.5.3"
+  },
+  "files": [
+    "lib/"
+  ]
 }

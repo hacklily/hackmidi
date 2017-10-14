@@ -1,0 +1,28 @@
+.App {
+  text-align: left;
+}
+
+.App-header {
+  background-color: #222;
+  padding: 20px;
+  color: white;
+  text-align: center;
+}
+
+.App-header a {
+  color: white;
+}
+
+.App-header a:hover {
+  color: grey;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+  width: 600px;
+  margin: auto;
+}

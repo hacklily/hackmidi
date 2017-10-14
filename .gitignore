@@ -57,3 +57,5 @@ typings/
 # dotenv environment variables file
 .env
 
+# emsdk, except for what was originally included
+vendor/emsdk-portable
