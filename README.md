@@ -14,7 +14,8 @@ npm install hackmidi --save
 
 ## Usage
 
-`import {playerFromMIDIBuffer} from "hackmidi";
+```
+import {playerFromMIDIBuffer} from "hackmidi";
 
 fetch("Chop-28-4.mid")
   .then(response => response.arrayBuffer())
@@ -33,10 +34,10 @@ fetch("Chop-28-4.mid")
     // ...
     
     player.seek(20.5 /* seconds */);
-  });``
+  });
 ```
 
 ## Demo
 
-See [https://www.hacklily.org/hackmidi](https://www.hacklily.org/hackmidi).
+See [https://www.hacklily.org/hackmidi/](https://www.hacklily.org/hackmidi/).
 
