@@ -22,11 +22,12 @@ class Player {
     private _paused = true;
     private _node: ScriptProcessorNode;
     private _array: Int16Array;
+    private _audioContext: AudioContext;
     private _bufferSize: number;
 
 
     constructor(songPtr: number, bytesPerSample: number, channels: number, bufferSize: number,
-            node: ScriptProcessorNode) {
+            node: ScriptProcessorNode, audioContext: AudioContext) {
         invariant(songPtr !== 0, "Created a Player without a song.");
         invariant(bytesPerSample > 0, "Created a Player with invalid bytesPerSample.");
         invariant(node != null, "A Player requires a ScriptProcessorNode");
@@ -37,6 +38,7 @@ class Player {
         this._bufferPtr = Libtimidity._malloc(bufferSize * this._bytesPerSample);
         this._node = node;
         this._array = new Int16Array(this._bufferSize * this._channels);
+        this._audioContext = audioContext;
         node.onaudioprocess = this._handleAudioProcess;
 
         Libtimidity.ccall(
@@ -72,6 +74,7 @@ class Player {
         );
         this._songPtr = 0;
         this._destroyed = true;
+        this._audioContext.close();
         this._node.disconnect();
         delete this._node.onaudioprocess;
     }
@@ -385,7 +388,8 @@ async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: stri
         prefs.channels * (((prefs.formatCode & 0xFF) == 16) ? 2 : 1),
         prefs.channels,
         prefs.bufferSize,
-        node
+        node,
+        audioContext,
     );
 
     return player;

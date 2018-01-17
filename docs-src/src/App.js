@@ -43,6 +43,9 @@ const pauseSrc = `player.pause();
 const seekSrc = `player.seek(20.5 /* seconds */);
 `;
 
+const destroySrc = `player.destroy();
+`;
+
 const endSrc = `  });
 
 
@@ -104,6 +107,10 @@ class App extends Component {
               <a href="#" onClick={this._seekChopin}>
                 {seekSrc}
               </a> : seekSrc}
+            {space}{this.state.readyToPause || this.state.readyToPlay ?
+              <a href="#" onClick={this._destroyChopin}>
+                {destroySrc}
+              </a> : destroySrc}
             {endSrc}
           </pre>
         </div>
@@ -147,6 +154,18 @@ class App extends Component {
 
   _seekChopin = () => {
     this._player.seek(20.5);
+  }
+
+  _destroyChopin = () => {
+    this.setState({
+      fetched: false,
+      readyToPlay: false,
+      readyToPause: false,
+      timeSec: undefined,
+      playing: undefined,
+    });
+    this._player.destroy();
+    this._player = null;
   }
 }
 
