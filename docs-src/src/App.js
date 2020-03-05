@@ -1,10 +1,12 @@
-import React, { Component } from 'react';
+/* eslint-disable jsx-a11y/anchor-is-valid */
+
+import React, {Component} from 'react';
 import './App.css';
 
 import {playerFromMIDIBuffer} from "hackmidi";
 
-const importSrc = 
-`// Click a link in the example below to run that line.
+const importSrc =
+  `// Click a link in the example below to run that line.
 
 
 import {playerFromMIDIBuffer} from "hackmidi";
@@ -12,11 +14,11 @@ import {playerFromMIDIBuffer} from "hackmidi";
 `;
 
 const fetchSrc =
-`fetch("Chop-28-4.mid")
+  `fetch("Chop-28-4.mid")
 `;
 
 const parseSrc =
-`  .then(response => response.arrayBuffer())
+  `  .then(response => response.arrayBuffer())
   .then(buffer => playerFromMIDIBuffer(buffer, "samples/"))
   .then(player => {
     player.addChangeListener((timeInSeconds, isPlaying) => {
@@ -32,7 +34,7 @@ const playSrc = `player.play();
 `;
 
 const space =
-`
+  `
     // ...
     
     `;
@@ -93,7 +95,7 @@ class App extends Component {
                 {fetchSrc}
               </a>}
             {parseSrc}{!isNaN(this.state.timeSec) &&
-                `  // (${this.state.timeSec}, ${this.state.playing})`}
+              `  // (${this.state.timeSec}, ${this.state.playing})`}
             {parseContinued}
             {playSpace}{this.state.readyToPlay ?
               <a href="#" onClick={this._playChopin}>
@@ -123,9 +125,9 @@ class App extends Component {
       fetched: true,
     });
 
-    fetch("Chop-28-4.mid")
+    fetch(`${process.env.PUBLIC_URL}/Chop-28-4.mid`)
       .then(response => response.arrayBuffer())
-      .then(buffer => playerFromMIDIBuffer(buffer, "samples/"))
+      .then(buffer => playerFromMIDIBuffer(buffer, `${process.env.PUBLIC_URL}/samples/`))
       .then(player => {
         this.setState({
           readyToPlay: true,

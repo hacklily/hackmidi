@@ -6,8 +6,8 @@ help:
 	@echo "    make clean"
 	@echo "The documentation is built separately:"
 	@echo "    cd docs-src # ... then"
-	@echo "    yarn serve"
-	@echo "    yarn build"
+	@echo "    npm run serve"
+	@echo "    npm run build"
 
 clean_libtimidity_js:
 	git clean -xffd ./vendor/emsdk-portable
@@ -23,7 +23,7 @@ build_libtimidity_js:
 	./scripts/build-libtimidity.sh
 
 build_ts:
-	yarn
+	npm install
 	rm -f lib/*
 	cp ./src/*js ./lib
 	./node_modules/.bin/tsc
