@@ -1,8 +1,10 @@
-import _loadLibtimidity = require("./libtimidity");
-const Libtimidity = _loadLibtimidity();
+import _loadLibtimidity, {Libtimidity} from "./libtimidity";
+const LibtimidityPromise = _loadLibtimidity();
 
-const version = Libtimidity.ccall("mid_get_version", "number", [], []);
-console.log(`Libtimidity version ${version}`);
+LibtimidityPromise.then((libtimidity) => {
+    const version = libtimidity.ccall("mid_get_version", "number", [], []);
+    console.log(`Libtimidity version ${version}`);
+});
 
 type ChangeListener = (timeSec: number, playing: boolean) => void;
 
@@ -24,10 +26,10 @@ class Player {
     private _array: Int16Array;
     private _audioContext: AudioContext;
     private _bufferSize: number;
-
+    private _libtimidity: Libtimidity;
 
     constructor(songPtr: number, bytesPerSample: number, channels: number, bufferSize: number,
-            node: ScriptProcessorNode, audioContext: AudioContext) {
+            node: ScriptProcessorNode, audioContext: AudioContext, libtimidity: Libtimidity) {
         invariant(songPtr !== 0, "Created a Player without a song.");
         invariant(bytesPerSample > 0, "Created a Player with invalid bytesPerSample.");
         invariant(node != null, "A Player requires a ScriptProcessorNode");
@@ -35,13 +37,14 @@ class Player {
         this._bytesPerSample = bytesPerSample;
         this._channels = channels;
         this._bufferSize = bufferSize;
-        this._bufferPtr = Libtimidity._malloc(bufferSize * this._bytesPerSample);
+        this._bufferPtr = libtimidity._malloc(bufferSize * this._bytesPerSample);
         this._node = node;
         this._array = new Int16Array(this._bufferSize * this._channels);
         this._audioContext = audioContext;
+        this._libtimidity = libtimidity;
         node.onaudioprocess = this._handleAudioProcess;
 
-        Libtimidity.ccall(
+        libtimidity.ccall(
             "mid_song_start",
             null, ["number"],
             [this._songPtr]
@@ -67,7 +70,7 @@ class Player {
     destroy(): void {
         invariant(!this._destroyed, "destroy() called after destroy()");
         this._listeners.splice(0, this._listeners.length);
-        Libtimidity.ccall(
+        this._libtimidity.ccall(
             "mid_song_free",
             null, ["number"],
             [this._songPtr],
@@ -76,7 +79,7 @@ class Player {
         this._destroyed = true;
         this._audioContext.close();
         this._node.disconnect();
-        delete this._node.onaudioprocess;
+        this._node.onaudioprocess = function() {}
     }
 
     /**
@@ -86,7 +89,7 @@ class Player {
         invariant(!this._destroyed, "seek() called after destroy()");
         const msec = Math.floor(sec * 1000);
 
-        Libtimidity.ccall(
+        this._libtimidity.ccall(
             "mid_song_seek",
             null, ["number", "number"],
             [this._songPtr, msec]);
@@ -99,7 +102,7 @@ class Player {
      */
     getTime(): number {
         invariant(!this._destroyed, "getTime() called after destroy()");
-        return Libtimidity.ccall(
+        return this._libtimidity.ccall(
             "mid_song_get_time",
             "number", ["number"],
             [this._songPtr]
@@ -111,7 +114,7 @@ class Player {
      */
     getDuration(): number {
         invariant(!this._destroyed, "getTotalTime() called after destroy()");
-        return Libtimidity.ccall(
+        return this._libtimidity.ccall(
             "mid_song_get_total_time",
             "number", ["number"],
             [this._songPtr]
@@ -172,7 +175,7 @@ class Player {
     }
 
     private _renderToArray(): number {
-        const byteCount = Libtimidity.ccall(
+        const byteCount = this._libtimidity.ccall(
             "mid_song_read_wave",
             "number", ["number", "number", "number"],
             [this._songPtr, this._bufferPtr, this._bufferSize * this._bytesPerSample]
@@ -182,8 +185,8 @@ class Player {
 		if (sampleCount !== 0) {
             // Only bother rendering if we have content.
 
-            // TODO(joshuan): We assume s16! Extend this.
-            this._array.set(Libtimidity.HEAP16.subarray(
+            // TODO(jocelyn): We assume s16! Extend this.
+            this._array.set(this._libtimidity.HEAP16.subarray(
                 this._bufferPtr / 2, (this._bufferPtr + byteCount) / 2)
             );
 		}
@@ -213,25 +216,25 @@ function _getDefaultPreferences(): Preferences {
     };
 }
 
-function _loadSong(midiData: ArrayBuffer, prefs: Preferences): number {
-    const optionsPtr = Libtimidity.ccall(
+function _loadSong(midiData: ArrayBuffer, prefs: Preferences, libtimidity: Libtimidity): number {
+    const optionsPtr = libtimidity.ccall(
         "mid_alloc_options",
         "number", ["number", "number", "number", "number"],
         [prefs.rate, prefs.formatCode, prefs.channels, prefs.bufferSize],
     );
 
     // Create a stream
-    const midiBufferPtr = Libtimidity._malloc(midiData.byteLength);
-    Libtimidity.HEAPU8.set(new Uint8Array(midiData), midiBufferPtr);
+    const midiBufferPtr = libtimidity._malloc(midiData.byteLength);
+    libtimidity.HEAPU8.set(new Uint8Array(midiData), midiBufferPtr);
 
-    const iStreamPtr = Libtimidity.ccall(
+    const iStreamPtr = libtimidity.ccall(
         "mid_istream_open_mem",
         "number", ["number", "number"],
         [midiBufferPtr, midiData.byteLength]
     );
 
     // Now, we can try to load the song itself
-    const songPtr = Libtimidity.ccall(
+    const songPtr = libtimidity.ccall(
         "mid_song_load",
         "number", ["number", "number"],
         [iStreamPtr, optionsPtr],
@@ -240,30 +243,30 @@ function _loadSong(midiData: ArrayBuffer, prefs: Preferences): number {
     if (songPtr === 0) {
         // Something failed.
         // TODO: Get some kinda error info from the library?
-        Libtimidity.ccall(
+        libtimidity.ccall(
             "mid_istream_close",
             "number", ["number"],
             [iStreamPtr]
         );
-        Libtimidity._free(optionsPtr);
-        Libtimidity._free(midiBufferPtr);
+        libtimidity._free(optionsPtr);
+        libtimidity._free(midiBufferPtr);
         throw new Error("Could not load that MIDI file.");
     }
 
     // We've got a song!
     // Clean up stuff we don't need any more
-    Libtimidity.ccall(
+    libtimidity.ccall(
         "mid_istream_close",
         "number", ["number"],
         [iStreamPtr]
     );
-    Libtimidity._free(optionsPtr);
-    Libtimidity._free(midiBufferPtr);
+    libtimidity._free(optionsPtr);
+    libtimidity._free(midiBufferPtr);
 
     return songPtr;
 }
 
-async function _loadPatchByName(name: string, patchUrlPrefix: string): Promise<void> {
+async function _loadPatchByName(name: string, patchUrlPrefix: string, libtimidity: Libtimidity): Promise<void> {
     console.log(name);
     const url = `${patchUrlPrefix}${name}`;
     const response = await fetch(url);
@@ -280,14 +283,14 @@ async function _loadPatchByName(name: string, patchUrlPrefix: string): Promise<v
     let pathSoFar = '/';
     for (let i = 0; i < pathBits.length; i++) {
         try {
-            Libtimidity.FS.mkdir(pathSoFar + pathBits[i]);
+            libtimidity.FS.mkdir(pathSoFar + pathBits[i]);
         } catch (e) {
             // do nothing
         }
         pathSoFar += `${pathBits[i]}/`;
     }
 
-    Libtimidity.FS.writeFile(
+    libtimidity.FS.writeFile(
         pathSoFar + basename,
         new Uint8Array(data),
         {
@@ -327,6 +330,7 @@ export function playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: stri
 
 async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: string, audioContext: AudioContext): Promise<Player> {
     const prefs = _getDefaultPreferences();
+    const libtimidity = await LibtimidityPromise;
 
     var node = audioContext.createScriptProcessor(prefs.bufferSize, 0, prefs.channels);
     node.connect(audioContext.destination);
@@ -337,15 +341,15 @@ async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: stri
             throw new Error("Could not get timidity.cfg");
         }
         let configText = await config.text();
-        Libtimidity.FS.writeFile("/timidity.cfg", configText);
-        Libtimidity.ccall("mid_init", "number", ["string"], ["/timidity.cfg"]);
+        libtimidity.FS.writeFile("/timidity.cfg", configText);
+        libtimidity.ccall("mid_init", "number", ["string"], ["/timidity.cfg"]);
         _loaded = true;
     }
 
-    let songPtr = _loadSong(midiData, prefs);
+    let songPtr = _loadSong(midiData, prefs, libtimidity);
 
     // Is it missing any patch files?
-    const missingPatchCount = Libtimidity.ccall(
+    const missingPatchCount = libtimidity.ccall(
         "mid_get_load_request_count",
         "number", ["number"],
         [songPtr],
@@ -354,26 +358,26 @@ async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: stri
     if (missingPatchCount > 0) {
         await Promise.all(  // Continue once we load all the patches asynchronously.
             Array(missingPatchCount).fill(null)  // Create an array with reqCount nulls.
-            .map((_, i) => Libtimidity.ccall(  // Get the names of the required patches
+            .map((_, i) => libtimidity.ccall(  // Get the names of the required patches
                 "mid_get_load_request",
                 "string", ["number", "number"],
                 [songPtr, i]))
-            .map(patchName => _loadPatchByName(patchName, patchUrlPrefix)));  // Load 'em
+            .map(patchName => _loadPatchByName(patchName, patchUrlPrefix, libtimidity)));  // Load 'em
 
         // We need to try loading the song again, now that we've loaded the patches.
-        Libtimidity.ccall(
+        libtimidity.ccall(
             "mid_song_free",
             null, ["number"],
             [songPtr],
         );
-        songPtr = _loadSong(midiData, prefs);
-        const newReqCount = Libtimidity.ccall(
+        songPtr = _loadSong(midiData, prefs, libtimidity);
+        const newReqCount = libtimidity.ccall(
             "mid_get_load_request_count",
             "number", ["number"],
             [songPtr],
         );
         if (newReqCount !== 0) {
-            Libtimidity.ccall(
+            libtimidity.ccall(
                 "mid_song_free",
                 null, ["number"],
                 [songPtr],
@@ -390,6 +394,7 @@ async function _playerFromMIDIBuffer(midiData: ArrayBuffer, patchUrlPrefix: stri
         prefs.bufferSize,
         node,
         audioContext,
+        libtimidity
     );
 
     return player;

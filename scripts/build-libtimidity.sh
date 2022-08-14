@@ -33,4 +33,6 @@ emcc -o src/libtimidity.js \
 	-s EXPORTED_FUNCTIONS=@vendor/libtimidityjs-exports.json \
 	-s MODULARIZE=1 \
 	-s 'EXPORT_NAME='\''Libtimidity'\''' \
-	-s 'EXTRA_EXPORTED_RUNTIME_METHODS=['\''FS'\'']'
+	-s ENVIRONMENT='web' \
+	-s SINGLE_FILE \
+	-s 'EXPORTED_RUNTIME_METHODS=['\''FS'\'','\''ccall'\'']'

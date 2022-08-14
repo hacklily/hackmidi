@@ -1,24 +1,19 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { Component } from "react";
+import "./App.css";
 
-import React, {Component} from 'react';
-import './App.css';
+import { playerFromMIDIBuffer } from "hackmidi";
 
-import {playerFromMIDIBuffer} from "hackmidi";
-
-const importSrc =
-  `// Click a link in the example below to run that line.
+const importSrc = `// Click a link in the example below to run that line.
 
 
 import {playerFromMIDIBuffer} from "hackmidi";
 
 `;
 
-const fetchSrc =
-  `fetch("Chop-28-4.mid")
+const fetchSrc = `fetch("Chop-28-4.mid")
 `;
 
-const parseSrc =
-  `  .then(response => response.arrayBuffer())
+const parseSrc = `  .then(response => response.arrayBuffer())
   .then(buffer => playerFromMIDIBuffer(buffer, "samples/"))
   .then(player => {
     player.addChangeListener((timeInSeconds, isPlaying) => {
@@ -33,8 +28,7 @@ const playSpace = "    ";
 const playSrc = `player.play();
 `;
 
-const space =
-  `
+const space = `
     // ...
     
     `;
@@ -71,48 +65,70 @@ class App extends Component {
     readyToPause: false,
     timeSec: undefined,
     playing: undefined,
-  }
+  };
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Hackmidi</h1>
           <p>
-            A JavaScript library to play MIDI files in
-            Edge, Firefox, Safari, and Chrome.
+            A JavaScript library to play MIDI files in Edge, Firefox, Safari,
+            and Chrome.
           </p>
           <p>
-            A fork of <a href="https://github.com/Treeki/midihackery.js">midihackery</a>.
-            Powered by <a href="http://libtimidity.sourceforge.net">libtimidity</a>.
-            Used in <a href="https://www.hacklily.org">Hacklily</a>.
+            A fork of{" "}
+            <a href="https://github.com/Treeki/midihackery.js">midihackery</a>.
+            Powered by{" "}
+            <a href="http://libtimidity.sourceforge.net">libtimidity</a>. Used
+            in <a href="https://www.hacklily.org">Hacklily</a>.
           </p>
         </header>
         <div className="App-intro">
           <pre>
             {importSrc}
-            {this.state.fetched ? fetchSrc :
+            {this.state.fetched ? (
+              fetchSrc
+            ) : (
               <a href="#" onClick={this._loadChopin}>
                 {fetchSrc}
-              </a>}
-            {parseSrc}{!isNaN(this.state.timeSec) &&
+              </a>
+            )}
+            {parseSrc}
+            {!isNaN(this.state.timeSec) &&
               `  // (${this.state.timeSec}, ${this.state.playing})`}
             {parseContinued}
-            {playSpace}{this.state.readyToPlay ?
+            {playSpace}
+            {this.state.readyToPlay ? (
               <a href="#" onClick={this._playChopin}>
                 {playSrc}
-              </a> : playSrc}
-            {space}{this.state.readyToPause ?
+              </a>
+            ) : (
+              playSrc
+            )}
+            {space}
+            {this.state.readyToPause ? (
               <a href="#" onClick={this._pauseChopin}>
                 {pauseSrc}
-              </a> : pauseSrc}
-            {space}{this.state.readyToPause || this.state.readyToPlay ?
+              </a>
+            ) : (
+              pauseSrc
+            )}
+            {space}
+            {this.state.readyToPause || this.state.readyToPlay ? (
               <a href="#" onClick={this._seekChopin}>
                 {seekSrc}
-              </a> : seekSrc}
-            {space}{this.state.readyToPause || this.state.readyToPlay ?
+              </a>
+            ) : (
+              seekSrc
+            )}
+            {space}
+            {this.state.readyToPause || this.state.readyToPlay ? (
               <a href="#" onClick={this._destroyChopin}>
                 {destroySrc}
-              </a> : destroySrc}
+              </a>
+            ) : (
+              destroySrc
+            )}
             {endSrc}
           </pre>
         </div>
@@ -126,16 +142,18 @@ class App extends Component {
     });
 
     fetch(`${process.env.PUBLIC_URL}/Chop-28-4.mid`)
-      .then(response => response.arrayBuffer())
-      .then(buffer => playerFromMIDIBuffer(buffer, `${process.env.PUBLIC_URL}/samples/`))
-      .then(player => {
+      .then((response) => response.arrayBuffer())
+      .then((buffer) =>
+        playerFromMIDIBuffer(buffer, `${process.env.PUBLIC_URL}/samples/`)
+      )
+      .then((player) => {
         this.setState({
           readyToPlay: true,
         });
         this._player = player;
         player.addChangeListener(this._handleChangeListener);
       });
-  }
+  };
 
   _handleChangeListener = (timeSec, playing) => {
     this.setState({
@@ -144,19 +162,19 @@ class App extends Component {
       readyToPlay: !playing,
       readyToPause: playing,
     });
-  }
+  };
 
   _playChopin = () => {
     this._player.play();
-  }
+  };
 
   _pauseChopin = () => {
     this._player.pause();
-  }
+  };
 
   _seekChopin = () => {
     this._player.seek(20.5);
-  }
+  };
 
   _destroyChopin = () => {
     this.setState({
@@ -168,7 +186,7 @@ class App extends Component {
     });
     this._player.destroy();
     this._player = null;
-  }
+  };
 }
 
 export default App;
