@@ -1,19 +1,17 @@
 {
-    "compilerOptions": {
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "experimentalDecorators": true,
-        "lib": ["es2015", "dom"],
-        "module": "commonjs",
-        "noFallthroughCasesInSwitch": true,
-        "noUnusedLocals": true,
-        "pretty": true,
-        "strict": true,
-        "target": "es5",
-        "esModuleInterop": true,
-	"outDir": "lib"
-    },
-    "include": [
-        "src/index.ts"
-    ]
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "lib": ["es2015", "dom"],
+    "module": "commonjs",
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "strict": true,
+    "target": "es5",
+    "esModuleInterop": true,
+    "outDir": "lib"
+  },
+  "include": ["src/index.ts"]
 }
