@@ -5,7 +5,7 @@ DIR_SCRIPTS=$(cd -P -- "$(dirname -- "$0")" && pwd -P)  # https://stackoverflow.
 DIR_ROOT="${DIR_SCRIPTS}/.."
 cd $DIR_ROOT
 
-SDK_VERSION=1.37.22
+SDK_VERSION=3.1.18
 ARCH=64bit
 
 if [ ! -e ./vendor/emsdk-portable/clang/e${SDK_VERSION}_${ARCH}/clang ]; then
