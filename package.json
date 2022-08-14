@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "description": "MIDI playback for web browsers.",
   "main": "lib/index.js",
-  "author": "Joshua Netterfield <joshua@nettek.ca>",
+  "author": "Jocelyn Stericker <jocelyn@nettek.ca>",
   "license": "LGPLv3",
   "private": false,
   "devDependencies": {
