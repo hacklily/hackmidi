@@ -226,15 +226,6 @@ type Preferences = {
   bufferSize: number;
 };
 
-function _getDefaultPreferences(): Preferences {
-  return {
-    formatCode: 0x8010, // s16
-    rate: 44100,
-    channels: 2,
-    bufferSize: 8192,
-  };
-}
-
 function _loadSong(
   midiData: ArrayBuffer,
   prefs: Preferences,
@@ -354,7 +345,13 @@ async function _playerFromMIDIBuffer(
   patchUrlPrefix: string,
   audioContext: AudioContext
 ): Promise<Player> {
-  const prefs = _getDefaultPreferences();
+  const prefs: Preferences = {
+    formatCode: 0x8010, // s16
+    rate: audioContext.sampleRate,
+    channels: 2,
+    bufferSize: 8192,
+  };
+
   const libtimidity = await LibtimidityPromise;
 
   var node = audioContext.createScriptProcessor(

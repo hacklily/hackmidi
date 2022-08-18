@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/hackmidi/static/css/main.7fbd665b.css",
-    "main.js": "/hackmidi/static/js/main.d782eb59.js",
+    "main.js": "/hackmidi/static/js/main.923a807c.js",
     "index.html": "/hackmidi/index.html",
     "main.7fbd665b.css.map": "/hackmidi/static/css/main.7fbd665b.css.map",
-    "main.d782eb59.js.map": "/hackmidi/static/js/main.d782eb59.js.map"
+    "main.923a807c.js.map": "/hackmidi/static/js/main.923a807c.js.map"
   },
   "entrypoints": [
     "static/css/main.7fbd665b.css",
-    "static/js/main.d782eb59.js"
+    "static/js/main.923a807c.js"
   ]
 }
