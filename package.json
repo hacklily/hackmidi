@@ -1,6 +1,6 @@
 {
   "name": "hackmidi",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "MIDI playback for web browsers.",
   "main": "lib/index.js",
   "author": "Jocelyn Stericker <jocelyn@nettek.ca>",
